@@ -27,7 +27,8 @@ from matplotlib import pyplot as plt
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 import skimage.feature as skf
 from skimage.exposure import rescale_intensity
-from skimage.measure import compare_mse
+#from skimage.measure import compare_mse
+from skimage.metrics import mean_squared_error as mse
 from skimage import exposure
 from skimage.transform import resize
 
@@ -35,7 +36,7 @@ from skimage.transform import resize
 pixelClasses = [ numpy.array([ 0.,  0.,  0.]), numpy.array([ 1.,  1.,  1.]) ]
 cnnModel = None
 patchSize = 96
-patchHalfSize = patchSize/2
+patchHalfSize = patchSize // 2
 cnnPredictFunction = None
 
 segments = None
@@ -64,8 +65,8 @@ def make_graph(grid):
     # find unique connections
     edges = numpy.unique(edge_hash)
     # undo hashing
-    edges = [[vertices[x%num_vertices],
-              vertices[x/num_vertices]] for x in edges]
+    edges = [[vertices[x % num_vertices],
+              vertices[x // num_vertices]] for x in edges]
 
     return vertices, edges
 
@@ -113,12 +114,12 @@ def getHistogramFeatures(bgrImage, centerY, centerX, forUnaryFeature=False) :
 
     if forUnaryFeature :
         # Histogram of Oriented Gradients
-        hog = skf.hog(grayPatch, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3), visualise=False, transform_sqrt=True)
+        hog = skf.hog(grayPatch, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(3, 3), transform_sqrt=True)
         return hist, hog
     else :
         # Histogram of Local Binary Pattern
         lbp = skf.local_binary_pattern(grayPatch, 24, 3, method='nri_uniform')
-        n_bins = lbp.max() + 1
+        n_bins = int(lbp.max() + 1)
         lbphist, _ = numpy.histogram(lbp, normed=True, bins=n_bins, range=(0, n_bins))
         return hist, lbphist
 
